@@ -1,9 +1,11 @@
 use rocket_dyn_templates::Template;
 
-use crate::model::context::Context;
+use crate::{model::context::Context, repositories::history_repository::get_all_history};
 
 #[get("/")]
-pub fn index() -> Template {
-    let context = Context { transactions: Vec::new(), history: Vec::new() };
+pub async fn index() -> Template {
+    let history = get_all_history().await;
+
+    let context = Context { transactions: Vec::new(), history };
     Template::render("index", &context)
 }

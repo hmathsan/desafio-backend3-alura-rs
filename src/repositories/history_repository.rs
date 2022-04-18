@@ -26,3 +26,21 @@ pub async fn save_import_history(date: String) -> ImportHistory {
 
     ImportHistory::new(date, current_date_time.to_string())
 }
+
+pub async fn get_all_history() -> Vec<ImportHistory> {
+    let (client, conn) = get_conn().await.unwrap();
+
+    let mut history: Vec<ImportHistory> = vec![];
+
+    tokio::spawn(async move {
+        if let Err(e) = conn.await {
+            eprintln!("{}", e);
+        }
+    });
+
+    for row in &client.query("SELECT * FROM import_history", &[]).await.unwrap() {
+        history.push(ImportHistory { transaction_date: row.get(1), import_date: row.get(2) })
+    }
+
+    history
+}
