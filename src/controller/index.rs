@@ -4,6 +4,6 @@ use crate::model::context::Context;
 
 #[get("/")]
 pub fn index() -> Template {
-    let context = Context { transactions: Vec::new() };
+    let context = Context { transactions: Vec::new(), history: Vec::new() };
     Template::render("index", &context)
 }

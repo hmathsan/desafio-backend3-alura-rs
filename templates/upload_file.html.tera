@@ -1,0 +1,13 @@
+<div class="row justify-content-center">
+    <div class="col-4 col-md-10 text-center">
+        <form id="uploadFile" method="post" enctype="multipart/form-data" action="/">
+            <div class="mb-3">
+                <input type="file" class="form-control" id="inputGroupFile02" name="csv">
+                <label class="text-start text-secondary form-label col-12" style="font-size:small" for="inputGroupFile02">Selecione o arquivo para realizar o upload</label>
+                <div class="col-12 d-inline-flex">
+                    <button type="submit" class="btn btn-primary">Importar</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,20 @@
+<h1 class="d-flex justify-content-center" style="margin:40px;margin-top:80px">IMPORTAÇÕES REALIZADAS</h1>
+
+<div class="row justify-content-center">
+    <table class="col-4 col-md-10 table table-striped">
+        <thead class="thead-dark table-light">
+            <tr>
+                <th scope="col">DATA TRANSAÇÕES</th>
+                <th scope="col">DATA IMPORTAÇÃO</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for transaction in history %}
+                <tr>
+                    <td scope="row">{{transaction.transaction_date}}</td>
+                    <td>{{transaction.import_date}}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

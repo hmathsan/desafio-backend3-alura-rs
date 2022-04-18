@@ -9,11 +9,13 @@ edition = "2021"
 rocket = "0.5.0-rc.1"
 tera = "1.15.0"
 serde = "^1.0.136"
+tokio = "^1.17.0"
 rocket-multipart-form-data = "^0.10.2"
 tokio-postgres = "^0.7.5"
 uuid = { version = "0.8.2", features = [ "v4" ] }
 dotenv = "^0.15.0"
 dotenv_codegen = "^0.15.0"
+chrono = "^0.4.19"
 
 [dependencies.rocket_dyn_templates]
 version = "^0.1.0-rc.1"

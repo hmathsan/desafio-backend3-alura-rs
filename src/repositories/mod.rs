@@ -4,6 +4,7 @@ use tokio_postgres::{Client, Connection, Socket, tls::NoTlsStream, Error, NoTls}
 pub struct RepositoryFairing;
 
 pub mod transactions_repository;
+pub mod history_repository;
 
 const POSTGRES_HOST: &str       = dotenv!("POSTGRES_HOST");
 const POSTGRES_PORT: &str       = dotenv!("POSTGRES_PORT");
