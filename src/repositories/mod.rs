@@ -11,6 +11,7 @@ pub struct RepositoryFairing;
 
 pub mod transactions_repository;
 pub mod history_repository;
+pub mod user_repository;
 
 #[database("postgres")]
 pub struct PostgresDatabase(pub diesel::PgConnection);

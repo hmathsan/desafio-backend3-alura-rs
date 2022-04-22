@@ -10,7 +10,7 @@ mod schema;
 mod model;
 mod vars;
 
-use controller::{index::index, process_uploaded_file::process_uploaded_file};
+use controller::{index::{index, login}, process_uploaded_file::process_uploaded_file, import_history::import_history};
 
 #[macro_use] extern crate rocket;
 
@@ -19,6 +19,8 @@ fn rocket() -> _ {
     rocket::build()
         .attach(PostgresDatabase::fairing())
         .attach(RepositoryFairing)
-        .mount("/", routes![index, process_uploaded_file])
+        .mount("/", routes![index, login])
+        .mount("/process_data", routes![process_uploaded_file])
+        .mount("/import_transaction", routes![import_history])
         .attach(Template::fairing())
 }

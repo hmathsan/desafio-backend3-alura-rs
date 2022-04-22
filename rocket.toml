@@ -1,0 +1,5 @@
+[default]
+secret_key = "QDADrNKrtnZhpKO34+NuO2tSpvi07BNn1UDC6T9r70iDgAI+2rZohREqwT3VawHMMuL23efuWLqXLcJj9Mht+A=="
+
+[global.databases]
+postgres= {url="postgres://postgres:password@localhost:5432/challenge_alura"}

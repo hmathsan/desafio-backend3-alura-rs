@@ -12,7 +12,7 @@ pub struct MFD<'v> {
     csv: TempFile<'v>
 }
 
-#[post("/", data = "<data>")]
+#[post("/process_data", data = "<data>")]
 pub async fn process_uploaded_file<'r>(data: Form<Contextual<'r, MFD<'r>>>, conn: PostgresDatabase) -> Template {
     let mut history = vec![];
     let file_data: Option<Vec<Transaction>> = match data.into_inner().value {

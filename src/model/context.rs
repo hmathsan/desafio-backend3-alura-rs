@@ -7,3 +7,8 @@ pub struct Context {
     pub transactions: Vec<Transaction>,
     pub history: Vec<ImportHistory>
 }
+
+#[derive(Serialize, Deserialize)]
+pub struct LoginContext {
+    pub error_message: String
+}
