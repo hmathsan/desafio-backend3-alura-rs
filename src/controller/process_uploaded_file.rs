@@ -1,10 +1,10 @@
 use std::{fs::File, io::{BufReader, BufRead}, env};
 
-use chrono::NaiveDateTime;
+use chrono::{NaiveDateTime, Local};
 use rocket::{fs::TempFile, http::ContentType, form::{Form, Contextual}, tokio::fs};
 use rocket_dyn_templates::Template;
 
-use crate::{model::{transaction::Transaction, context::Context}, repositories::{transactions_repository::save_transactions, history_repository::save_import_history}};
+use crate::{model::{transaction::Transaction, context::Context, import_history::ImportHistory}, repositories::{transactions_repository::save_transactions, history_repository::save_import_history, PostgresDatabase}};
 
 #[derive(Debug, FromForm)]
 pub struct MFD<'v> {
@@ -13,7 +13,7 @@ pub struct MFD<'v> {
 }
 
 #[post("/", data = "<data>")]
-pub async fn process_uploaded_file<'r>(data: Form<Contextual<'r, MFD<'r>>>) -> Template {    
+pub async fn process_uploaded_file<'r>(data: Form<Contextual<'r, MFD<'r>>>, conn: PostgresDatabase) -> Template {
     let mut history = vec![];
     let file_data: Option<Vec<Transaction>> = match data.into_inner().value {
         Some(data) => {
@@ -26,6 +26,8 @@ pub async fn process_uploaded_file<'r>(data: Form<Contextual<'r, MFD<'r>>>) -> T
             let reader = BufReader::new(csv_file_str);
             
             let mut transactions = vec![];
+
+            let current_date_time = Local::now().format("%d/%m/%Y - %T").to_string();
 
             for line in reader.lines() {
                 let line = line.unwrap();
@@ -47,11 +49,14 @@ pub async fn process_uploaded_file<'r>(data: Form<Contextual<'r, MFD<'r>>>) -> T
                     date.format("%d/%m/%Y %T").to_string(),
                 );
 
-                history.push(save_import_history(date.format("%d/%m/%Y").to_string()).await);
-                save_transactions(&transaction).await;
+                history.push(
+                    ImportHistory::new(date.format("%d/%m/%Y").to_string(), current_date_time.clone()));
 
                 transactions.push(transaction);
             }
+
+            save_transactions(&conn, transactions.clone()).await;
+            save_import_history(&conn, history.clone()).await;
 
             fs::remove_file(&path).await.unwrap();
 

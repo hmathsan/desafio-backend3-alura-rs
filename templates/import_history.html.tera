@@ -11,8 +11,8 @@
         <tbody>
             {% for transaction in history %}
                 <tr>
-                    <td scope="row">{{transaction.transaction_date}}</td>
-                    <td>{{transaction.import_date}}</td>
+                    <td scope="row">{{transaction.data_transacoes}}</td>
+                    <td>{{transaction.data_importacao}}</td>
                 </tr>
             {% endfor %}
         </tbody>

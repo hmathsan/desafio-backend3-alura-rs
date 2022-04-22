@@ -1,29 +1,19 @@
-use rocket::{fairing::{Fairing, Info, Kind, self}, Rocket, Build, tokio};
-use tokio_postgres::{Client, Connection, Socket, tls::NoTlsStream, Error, NoTls};
+use rocket::{fairing::{Fairing, Info, Kind, self}, Rocket, Build};
+use diesel::prelude::*;
+use argonautica::Hasher;
+use rocket_sync_db_pools::database;
+
+use crate::{vars::{default_user_email, default_user_password, secret_key}, model::user::User};
+
+use crate::schema::users::dsl::*;
 
 pub struct RepositoryFairing;
 
 pub mod transactions_repository;
 pub mod history_repository;
 
-const POSTGRES_HOST: &str       = dotenv!("POSTGRES_HOST");
-const POSTGRES_PORT: &str       = dotenv!("POSTGRES_PORT");
-const POSTGRES_USER: &str       = dotenv!("POSTGRES_USER");
-const POSTGRES_PASSWORD: &str   = dotenv!("POSTGRES_PASSWORD");
-const POSTGRES_DB: &str         = dotenv!("POSTGRES_DB");
-
-
-pub async fn get_conn() -> Result<(Client, Connection<Socket, NoTlsStream>), Error>{
-    let host =      if POSTGRES_HOST.is_empty() { "localhost" } else { POSTGRES_HOST };
-    let port =      if POSTGRES_PORT.is_empty() { "5432" } else { POSTGRES_PORT };
-    let user =      if POSTGRES_USER.is_empty() { "postgres" } else { POSTGRES_USER };
-    let password =  if POSTGRES_PASSWORD.is_empty() { "password" } else { POSTGRES_PASSWORD };
-    let db =        if POSTGRES_DB.is_empty() { "postgres" } else { POSTGRES_DB };
-
-    let params = &format!("host={} port={} user={} password={} dbname={}", host, port, user, password, db)[..];
-
-    tokio_postgres::connect(params, NoTls).await
-}
+#[database("postgres")]
+pub struct PostgresDatabase(pub diesel::PgConnection);
 
 #[rocket::async_trait]
 impl Fairing for RepositoryFairing {
@@ -35,41 +25,39 @@ impl Fairing for RepositoryFairing {
     }
 
     async fn on_ignite(&self, rocket: Rocket<Build>) -> fairing::Result {
-        match get_conn().await {
-            Ok((client, conn)) => {
-                tokio::spawn(async move {
-                    if let Err(e) = conn.await {
-                        eprintln!("{}", e);
-                    }
-                });
+        println!("Checking if default user is in the database.");
+        let db = PostgresDatabase::get_one(&rocket).await.unwrap();
 
-                client.execute("CREATE TABLE IF NOT EXISTS transactions (
-                    id varchar NOT NULL,
-                    banco_org varchar NOT NULL,
-                    agencia_org varchar NOT NULL,
-                    conta_org varchar NOT NULL,
-                    banco_dest varchar NOT NULL,
-                    agencia_dest varchar NOT NULL,
-                    conta_dest varchar NOT NULL,
-                    valor varchar NOT NULL,
-                    data varchar NOT NULL,
-                    PRIMARY KEY (id)
-                  );", &[]).await.unwrap();
+        let default_password = default_user_password();
 
-                  client.execute("CREATE TABLE IF NOT EXISTS import_history (
-                    id varchar NOT NULL,
-                    data_transacoes varchar NOT NULL,
-                    data_importacao varchar NOT NULL,
-                    PRIMARY KEY(id)
-                  );", &[]).await.unwrap();
-    
-                println!("Returning Ok");
-                return Result::Ok(rocket)
-            },
-            Err(_) => {
-                eprintln!("Unable to connect to database.");
-                return Err(rocket)
-            },
+        let default_user = db.run(|conn| users
+            .filter(email.eq(default_user_email()))
+            .load::<User>(&*conn)
+            .unwrap()).await;
+
+        if default_user.len() <= 0 {
+            println!("Default user doesn't exist, creating.");
+            let mut hasher = Hasher::default();
+
+            let password = hasher.with_password(default_password)
+                .with_secret_key(secret_key())
+                .hash().unwrap();
+
+            let default_user = User {
+                id: uuid::Uuid::new_v4().to_string(),
+                email: default_user_email(),
+                nome: "Admin".to_string(),
+                senha: password
+            };
+
+            db.run(|conn| diesel::insert_into(users).values(default_user).get_result::<User>(&*conn))
+                .await.expect("Error creating default user.");
+
+            println!("Default user created.");
+        } else {
+            println!("Default user already exists on the database.");
         }
+
+        Ok(rocket)
     }
 }

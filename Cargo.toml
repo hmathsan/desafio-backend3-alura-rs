@@ -11,12 +11,19 @@ tera = "1.15.0"
 serde = "^1.0.136"
 tokio = "^1.17.0"
 rocket-multipart-form-data = "^0.10.2"
-tokio-postgres = "^0.7.5"
-uuid = { version = "0.8.2", features = [ "v4" ] }
+diesel = { version = "^1.4.4", features = [ "postgres", "chrono" ] }
+uuid = { version = "^1.0.0", features = [ "v4" ] }
 dotenv = "^0.15.0"
 dotenv_codegen = "^0.15.0"
 chrono = "^0.4.19"
+lettre = "^0.9.6"
+argonautica = "^0.2.0"
 
 [dependencies.rocket_dyn_templates]
 version = "^0.1.0-rc.1"
 features = ["tera"]
+
+[dependencies.rocket_sync_db_pools]
+version = "0.1.0-rc.1"
+default-features = false
+features = ["diesel_postgres_pool"]

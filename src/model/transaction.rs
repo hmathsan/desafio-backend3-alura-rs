@@ -1,37 +1,43 @@
 use serde::{Serialize, Deserialize};
+use uuid::Uuid;
 
-#[derive(Debug, Serialize, Deserialize)]
+use crate::schema::transactions;
+
+#[derive(Debug, Clone, Serialize, Deserialize, Queryable, Insertable)]
+#[table_name="transactions"]
 pub struct Transaction {
-    pub bank_origin: String,
-    pub agency_origin: String,
-    pub account_origin: String,
-    pub bank_destiny: String,
-    pub agency_destiny: String,
-    pub account_destiny: String,
-    pub value: f32,
-    pub date: String
+    pub id: String,
+    pub banco_org: String,
+    pub agencia_org: String,
+    pub conta_org: String,
+    pub banco_dest: String,
+    pub agencia_dest: String,
+    pub conta_dest: String,
+    pub valor: f32,
+    pub data: String
 }
 
 impl Transaction {
     pub fn new(
-        bank_origin: String,
-        agency_origin: String,
-        account_origin: String,
-        bank_destiny: String,
-        agency_destiny: String,
-        account_destiny: String,
-        value: f32,
-        date: String
+        banco_org: String,
+        agencia_org: String,
+        conta_org: String,
+        banco_dest: String,
+        agencia_dest: String,
+        conta_dest: String,
+        valor: f32,
+        data: String
     ) -> Self {
-        Self{ 
-            bank_origin, 
-            agency_origin, 
-            account_origin, 
-            bank_destiny, 
-            agency_destiny, 
-            account_destiny, 
-            value,
-            date
+        Self{
+            id: Uuid::new_v4().to_string(),
+            banco_org, 
+            agencia_org, 
+            conta_org, 
+            banco_dest, 
+            agencia_dest, 
+            conta_dest, 
+            valor,
+            data
         }
     }
 }
