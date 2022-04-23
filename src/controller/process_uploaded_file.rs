@@ -1,10 +1,18 @@
 use std::{fs::File, io::{BufReader, BufRead}, env};
 
 use chrono::{NaiveDateTime, Local};
-use rocket::{fs::TempFile, http::{ContentType, CookieJar}, form::{Form, Contextual}, tokio::fs, response::{Flash, Redirect}};
-use rocket_dyn_templates::Template;
+use rocket::{fs::TempFile, http::{ContentType, CookieJar}, form::{Form, Contextual}, tokio::fs, response::Redirect};
 
-use crate::{model::{transaction::Transaction, context::Context, import_history::ImportHistory}, repositories::{transactions_repository::save_transactions, history_repository::save_import_history, PostgresDatabase}};
+use crate::{
+    model::{
+        transaction::Transaction, 
+        import_history::ImportHistory
+    }, 
+    repositories::{
+        transactions_repository::save_transactions, 
+        history_repository::save_import_history, 
+        PostgresDatabase}, guards::auth_guard::AuthValidation
+    };
 
 #[derive(Debug, FromForm)]
 pub struct MFD<'v> {
@@ -16,13 +24,14 @@ pub struct MFD<'v> {
 pub async fn process_uploaded_file<'r>(
     data: Form<Contextual<'r, MFD<'r>>>, 
     cookies: &CookieJar<'_>,
-    conn: PostgresDatabase
+    conn: PostgresDatabase,
+    _auth_guard: AuthValidation
 ) -> Redirect {
     let user_id = String::from(cookies.get_private("user_id").unwrap().value());
 
     let mut history = vec![];
 
-    let file_data: Option<Vec<Transaction>> = match data.into_inner().value {
+    match data.into_inner().value {
         Some(data) => {
             let path = format!("{}\\temp.csv", env::current_dir().unwrap().to_string_lossy());
 
@@ -78,4 +87,9 @@ pub async fn process_uploaded_file<'r>(
     };
 
     Redirect::to(uri!("/import_transaction"))
+}
+
+#[post("/", data = "<_data>", rank = 2)]
+pub async fn process_uploaded_file_redirect<'r>(_data: Form<Contextual<'r, MFD<'r>>>) -> Redirect {
+    Redirect::to(uri!("/"))
 }

@@ -2,19 +2,33 @@ use chrono::Utc;
 use rocket::{http::{CookieJar, Cookie}, form::Form, request::FlashMessage, response::{Flash, Redirect}};
 use rocket_dyn_templates::Template;
 
-use crate::{repositories::{user_repository::find_user_by_email, PostgresDatabase}, model::context::LoginContext};
+use crate::{repositories::{user_repository::find_user_by_email, PostgresDatabase}, model::context::LoginContext, guards::auth_guard::AuthValidation};
 
 #[get("/")]
+pub async fn login_redirect(_auth_guard: AuthValidation) -> Redirect {
+    Redirect::to(uri!("/import_transaction"))
+}
+
+#[get("/", rank = 2)]
 pub async fn login_screen(
-    flash: Option<FlashMessage<'_>>
+    flash: Option<FlashMessage<'_>>,
+    cookies: &CookieJar<'_>
 ) -> Template {
     println!("Entrou /login");
     let error_message = match flash {
         Some(message) => message.message().to_string(),
-        None => String::new(),
+        None => {
+            println!("{:?}", cookies);
+            match cookies.get_private("user_id") {
+                Some(_) => String::from("Usuário não logado ou login expirado. Por favor faça o login."),
+                None => String::new(),
+            }
+        },
     };
 
-    let is_error = error_message == "O email ou senha estão incorretos.";
+    let is_error = 
+        error_message == "O email ou senha estão incorretos." ||
+        error_message == "Usuário não logado ou login expirado. Por favor faça o login.";
 
     let context = LoginContext{ is_error, error_message };
     Template::render("login/login_index", &context)

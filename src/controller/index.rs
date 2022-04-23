@@ -22,7 +22,7 @@ pub async fn index(
                     let diff = now - user_login_time;
 
                     if diff.num_minutes() > default_user_login_timeout() as i64 {
-                        return Flash::error(Redirect::to(uri!("/login")), "User login timed out.")
+                        return Flash::error(Redirect::to(uri!("/login")), "Usuário não logado ou login expirado. Por favor faça o login.")
                     } else {
                         return Flash::success(Redirect::to(uri!("/import_transaction")), "User already logged in.")
                     }
