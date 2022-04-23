@@ -1,7 +1,7 @@
 use std::{fs::File, io::{BufReader, BufRead}, env};
 
 use chrono::{NaiveDateTime, Local};
-use rocket::{fs::TempFile, http::ContentType, form::{Form, Contextual}, tokio::fs};
+use rocket::{fs::TempFile, http::{ContentType, CookieJar}, form::{Form, Contextual}, tokio::fs, response::{Flash, Redirect}};
 use rocket_dyn_templates::Template;
 
 use crate::{model::{transaction::Transaction, context::Context, import_history::ImportHistory}, repositories::{transactions_repository::save_transactions, history_repository::save_import_history, PostgresDatabase}};
@@ -12,9 +12,16 @@ pub struct MFD<'v> {
     csv: TempFile<'v>
 }
 
-#[post("/process_data", data = "<data>")]
-pub async fn process_uploaded_file<'r>(data: Form<Contextual<'r, MFD<'r>>>, conn: PostgresDatabase) -> Template {
+#[post("/", data = "<data>")]
+pub async fn process_uploaded_file<'r>(
+    data: Form<Contextual<'r, MFD<'r>>>, 
+    cookies: &CookieJar<'_>,
+    conn: PostgresDatabase
+) -> Redirect {
+    let user_id = String::from(cookies.get_private("user_id").unwrap().value());
+
     let mut history = vec![];
+
     let file_data: Option<Vec<Transaction>> = match data.into_inner().value {
         Some(data) => {
             let path = format!("{}\\temp.csv", env::current_dir().unwrap().to_string_lossy());
@@ -39,6 +46,7 @@ pub async fn process_uploaded_file<'r>(data: Form<Contextual<'r, MFD<'r>>>, conn
                 ).unwrap();
 
                 let transaction = Transaction::new(
+                    user_id.clone(),
                     splitted_line.get(0).unwrap().to_string(),
                     splitted_line.get(1).unwrap().to_string(),
                     splitted_line.get(2).unwrap().to_string(),
@@ -50,7 +58,11 @@ pub async fn process_uploaded_file<'r>(data: Form<Contextual<'r, MFD<'r>>>, conn
                 );
 
                 history.push(
-                    ImportHistory::new(date.format("%d/%m/%Y").to_string(), current_date_time.clone()));
+                    ImportHistory::new(
+                        user_id.clone(),
+                        date.format("%d/%m/%Y").to_string(), 
+                        current_date_time.clone())
+                    );
 
                 transactions.push(transaction);
             }
@@ -65,11 +77,5 @@ pub async fn process_uploaded_file<'r>(data: Form<Contextual<'r, MFD<'r>>>, conn
         None => None,
     };
 
-    let file_data = match file_data {
-        Some(transactions) => {transactions},
-        None => Vec::new()
-    };
-
-    let context = Context { transactions: file_data, history };
-    Template::render("index", context)
+    Redirect::to(uri!("/import_transaction"))
 }

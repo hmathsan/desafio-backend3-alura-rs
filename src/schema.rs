@@ -1,6 +1,7 @@
 table! {
     import_history (id) {
         id -> Varchar,
+        user_id -> Varchar,
         data_transacoes -> Varchar,
         data_importacao -> Varchar,
     }
@@ -9,6 +10,7 @@ table! {
 table! {
     transactions (id) {
         id -> Varchar,
+        user_id -> Varchar,
         banco_org -> Varchar,
         agencia_org -> Varchar,
         conta_org -> Varchar,

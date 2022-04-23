@@ -11,7 +11,7 @@
     <main style="width:100%;max-width:660px;padding:15px;margin:auto;">
         {% include "login/login_header" %}
         
-        {% if error_message != "" %}
+        {% if is_error %}
             <p class="text-danger">{{error_message}}</p>
         {% endif %}
         {% include "login/login_form" %}

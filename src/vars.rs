@@ -19,3 +19,9 @@ pub fn default_user_password() -> String {
 
     var("DEFAULT_USER_PASSWORD").expect("DEFAULT_USER_PASSWORD is not set")
 }
+
+pub fn default_user_login_timeout() -> usize {
+    dotenv().ok();
+
+    var("USER_LOGIN_TIMEOUT").expect("USER_LOGIN_TIMEOUT is not set").parse::<usize>().unwrap()
+}

@@ -10,5 +10,6 @@ pub struct Context {
 
 #[derive(Serialize, Deserialize)]
 pub struct LoginContext {
+    pub is_error: bool,
     pub error_message: String
 }

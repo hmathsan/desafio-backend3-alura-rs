@@ -3,10 +3,12 @@ use uuid::Uuid;
 
 use crate::schema::transactions;
 
-#[derive(Debug, Clone, Serialize, Deserialize, Queryable, Insertable)]
+#[derive(Debug, Clone, Serialize, Deserialize, Queryable, Insertable, Identifiable, Associations)]
+#[diesel(belongs_to(User))]
 #[table_name="transactions"]
 pub struct Transaction {
     pub id: String,
+    pub user_id: String,
     pub banco_org: String,
     pub agencia_org: String,
     pub conta_org: String,
@@ -19,6 +21,7 @@ pub struct Transaction {
 
 impl Transaction {
     pub fn new(
+        user_id: String,
         banco_org: String,
         agencia_org: String,
         conta_org: String,
@@ -30,6 +33,7 @@ impl Transaction {
     ) -> Self {
         Self{
             id: Uuid::new_v4().to_string(),
+            user_id,
             banco_org, 
             agencia_org, 
             conta_org, 

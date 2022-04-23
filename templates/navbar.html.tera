@@ -1,0 +1,39 @@
+<header>
+    <div class="px-3 py-2 bg-dark text-white">
+        <div class="container">
+            <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
+                <ul class="d-flex align-items-center my-2 my-lg-0 me-lg-auto nav col-12 col-lg-auto my-2 justify-content-center my-md-0 text-small">
+                    <li>
+                        <a href="/import_transaction" class="nav-link text-white">
+                            <i class="bi bi-table d-block mx-auto mb-1" style="width:24px;height:35px;font-size:24px;"></i>
+                            Importações
+                        </a>
+                    </li>
+                    
+                    <li>
+                        <a href="/users" class="nav-link text-white">
+                            <i class="bi bi-person-square d-block mx-auto mb-1" style="width:24px;height:35px;font-size:24px;"></i>
+                            Usuários
+                        </a>
+                    </li>
+
+                </ul>
+                <div class="">
+                    <a href="/logout" class="nav-link text-danger">
+                        <i class="bi bi-door-closed d-block mx-auto mb-1" style="width:24px;height:35px;font-size:24px;"></i>
+                        Sair
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# <a class="d-flex align-items-center col-md-3 mb-2 mb-md-0 text-dark text-decoration-none"></a>
+    <ul class="nav col-12 col-md-auto mb-2 justify-content-center mb-md-0">
+        <li><a href="/import_transaction" class="nav-link px-2 link-dark">Importações</a></li>
+        <li><a href="/users" class="nav-link px-2 link-dark">Usuários</a></li>
+    </ul>
+    <div class="col-md-3 text-end">
+        <button type="button" class="btn btn-outline-primary me-2">Sair</button>
+    </div> #}
+</header>
